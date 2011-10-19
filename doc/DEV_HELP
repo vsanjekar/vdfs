@@ -1,0 +1,47 @@
+Data Structures Associated with Filesystems
+
+In addition to the fundamental VFS objects, the kernel uses other standard data structures to manage data related to filesystems. The first object is used to describe a specific variant of a filesystem, such as ext3 or XFS. The second data structure is used to describe a mounted instance of a filesystem.
+
+Because Linux supports so many different filesystems, the kernel must have a special structure for describing the abilities and behavior of each filesystem.
+
+struct file_system_type {
+        const char              *name;     /* filesystem's name */
+        struct subsystem        subsys;    /* sysfs subsystem object */
+        int                     fs_flags;  /* filesystem type flags */
+
+        /* the following is used to read the superblock off the disk */
+        struct super_block      *(*get_sb) (struct file_system_type *, int,
+                                            char *, void *);
+
+        /* the following is used to terminate access to the superblock */
+        void                    (*kill_sb) (struct super_block *);
+
+        struct module           *owner;    /* module owning the filesystem */
+        struct file_system_type *next;     /* next file_system_type in list */
+        struct list_head        fs_supers; /* list of superblock objects */
+};
+
+The get_sb() function is used to read the superblock from the disk and populate the superblock object when the filesystem is loaded. The remaining functions describe the filesystem's properties.
+
+There is only one file_system_type per filesystem, regardless of how many instances of the filesystem are mounted on the system, or whether the filesystem is even mounted at all.
+
+Things get more interesting when the filesystem is actually mounted, at which point the vfsmount structure is created. This structure is used to represent a specific instance of a filesystemin other words, a mount point.
+
+The vfsmount structure is defined in <linux/mount.h>. Here it is:
+
+struct vfsmount {
+        struct list_head   mnt_hash;        /* hash table list */
+        struct vfsmount    *mnt_parent;     /* parent filesystem */
+        struct dentry      *mnt_mountpoint; /* dentry of this mount point */
+        struct dentry      *mnt_root;       /* dentry of root of this fs */
+        struct super_block *mnt_sb;         /* superblock of this filesystem */
+        struct list_head   mnt_mounts;      /* list of children */
+        struct list_head   mnt_child;       /* list of children */
+        atomic_t           mnt_count;       /* usage count */
+        int                mnt_flags;       /* mount flags */
+        char               *mnt_devname;    /* device file name */
+        struct list_head   mnt_list;        /* list of descriptors */
+        struct list_head   mnt_fslink;      /* fs-specific expiry list */
+        struct namespace   *mnt_namespace   /* associated namespace */
+};
+
