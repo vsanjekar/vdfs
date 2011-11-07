@@ -1,7 +1,7 @@
-obj-m +=vdfs_fs.o
 obj-m +=super.o
+obj-m +=inode.o
 obj-m +=vdfs.o
-vdfs-objs := vdfs_fs.o super.o
+vdfs-objs := super.o inode.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
