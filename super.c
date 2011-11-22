@@ -121,10 +121,10 @@ int __init register_vdfs(void){
  *   */
 static int __init init_vdfs(void){
 
-	        int ret;
-		        printk("Hi .... Welcome to vdfs!\n");
-			        ret = register_vdfs();
-				        return 0;
+	int ret;
+	printk("Hi .... Welcome to vdfs!\n");
+	ret = register_vdfs();
+	return 0;
 }
 
 /*
@@ -132,7 +132,7 @@ static int __init init_vdfs(void){
  *   */
 static  void __exit exit_vdfs(void){
 
-	        printk("Goodbye.\n");
+	printk("Goodbye.\n");
 }
 
 MODULE_AUTHOR("Vinay Sanjekar.");
