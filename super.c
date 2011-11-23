@@ -14,8 +14,13 @@
 
 /* Function declarations */
 static int vdfs_fill_super(struct super_block *, void *, int);
+/* get_sb is equivalent to mount filesystem */
+static struct dentry* vdfs_mount(struct file_system_type fs_type,
+		int flags, const char *dev_name, void *data);
+/*
 static int vdfs_get_sb(struct file_system_type *fs_type, int flags, 
 		const char *dev_name, void * data, struct vfsmount *mnt);
+		*/
 static void vdfs_kill_sb(struct super_block *);
 
 /* Global variables */
@@ -23,13 +28,16 @@ struct inode *vdfs_root_inode;
 
 static struct file_system_type vdfs_fs_type = {
 	.name		= "vdfs",
+	.owner		= THIS_MODULE,
+	.mount		= vdfs_mount,
 	.get_sb		= vdfs_get_sb,
 	.kill_sb	= vdfs_kill_sb,
-	.owner		= THIS_MODULE,
+	.fs_flags	= 0,
 };
 
 static const struct super_operations vdfs_sops = {
 	.alloc_inode	= vdfs_alloc_inode,
+	.drop_inode 	= vdfs_drop_inode,
 	.destroy_inode 	= vdfs_destroy_inode,
 	.write_inode	= vdfs_write_inode,
 	/*
@@ -80,9 +88,19 @@ static int vdfs_fill_super(struct super_block *sb, void *data, int flags){
 
 	return 0;
 }
+
 /* 
- * Returns the superblock to mount vdfs.
+ * get the vdfs superblock.
  */
+static struct dentry* vdfs_mount(struct file_system_type fs_type,
+		int flags, const char *dev_name, void *data){
+
+	struct superblock *sb;
+
+
+}
+
+/*
 static int vdfs_get_sb(struct file_system_type *fs_type, int flags, 
 		const char *dev_name, void * data, struct vfsmount *mnt){
 
@@ -91,6 +109,7 @@ static int vdfs_get_sb(struct file_system_type *fs_type, int flags,
 	// Get the superblock
 	return get_sb_single(fs_type, flags, data, &vdfs_fill_super, mnt);
 }
+*/
 
 /*
  * Unmount vdfs
@@ -132,6 +151,7 @@ static int __init init_vdfs(void){
  *   */
 static  void __exit exit_vdfs(void){
 
+	unregister_filesystem(&vdfs_fs_type);
 	printk("Goodbye.\n");
 }
 
