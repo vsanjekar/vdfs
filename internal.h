@@ -2,6 +2,11 @@
  * linux/fs/vdfs/internal.h
  */
 
+
+/* 
+ * Function declarations 
+ * */
+
 /*
  * super.c
  */

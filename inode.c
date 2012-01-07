@@ -4,16 +4,24 @@
 
 #include <linux/fs.h>
 
+/* 
+ * Function declarations 
+ * */
+struct inode *vdfs_alloc_inode(struct super_block *sb);
+void vdfs_destroy_inode(struct inode *inode);
+int vdfs_write_inode(void );
+
+
 struct inode *vdfs_alloc_inode(struct super_block *sb){
 
-	struct inode *inode;
+	struct inode *inode = NULL;
 
 	return inode;
-
 }
 
 void vdfs_destroy_inode(struct inode *inode){
 
+	return;
 }
 
 int vdfs_write_inode(){
