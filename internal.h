@@ -1,17 +1,10 @@
 /*
  * linux/fs/vdfs/internal.h
  */
+#define VDFS_MAGIC 0x76646673   /* ASCII vdfs */
 
+extern const struct inode_operations vdfs_inode_operations;
+extern const struct file_operations vdfs_file_operations;
 
-/* 
- * Function declarations 
- * */
-
-/*
- * super.c
- */
-int __init register_vdfs(void);
-struct inode *vdfs_alloc_inode(void);
-void vdfs_destroy_inode(struct inode *inode);
+struct inode *vdfs_alloc_inode(struct super_block *sb);
 int vdfs_write_inode(void);
-
