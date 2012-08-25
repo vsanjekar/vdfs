@@ -18,7 +18,3 @@ struct inode *vdfs_alloc_inode(struct super_block *sb){
 	return inode;
 }
 
-int vdfs_write_inode(void){
-
-	return 0;
-}

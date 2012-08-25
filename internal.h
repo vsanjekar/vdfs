@@ -7,4 +7,3 @@ extern const struct inode_operations vdfs_inode_operations;
 extern const struct file_operations vdfs_file_operations;
 
 struct inode *vdfs_alloc_inode(struct super_block *sb);
-int vdfs_write_inode(void);

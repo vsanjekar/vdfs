@@ -7,24 +7,25 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/fs.h>
-#include <linux/vdfs.h>
 
-#include "internal.h"
+#define VDFS_MAGIC 0x76646673   /* ASCII vdfs */
 
-static int __init register_vdfs(void);
 static int vdfs_fill_super(struct super_block *, void *, int);
 /* get_sb is equivalent to mount filesystem */
 static struct dentry* vdfs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void*data);
-/*static int vdfs_get_sb(struct file_system_type *fs_type, int flags, const char *dev_name, void * data, struct vfsmount *mnt); */
+/*
+static int vdfs_get_sb(struct file_system_type *fs_type, int flags, const char *dev_name, void * data, struct vfsmount *mnt); 
+*/
 static void vdfs_kill_sb(struct super_block *);
 
+struct inode *vdfs_alloc_inode(struct super_block *sb);
 
 static struct file_system_type vdfs_fs_type = {
-	.name		= "vdfs",
 	.owner		= THIS_MODULE,
+	.name		= "vdfs",
 	.mount		= vdfs_mount,
 	.kill_sb	= vdfs_kill_sb,
-	.fs_flags	= 0,
+	.fs_flags       = FS_REQUIRES_DEV,
 };
 
 static const struct super_operations vdfs_sops = {
@@ -56,9 +57,22 @@ const struct file_operations vdfs_file_operations = {
         */
 };
 
+struct inode *vdfs_alloc_inode(struct super_block *sb){
+
+        struct inode * inode = new_inode(sb);
+
+        if (inode) {
+                inode->i_ino = get_next_ino();
+                inode->i_sb = sb;
+                inode->i_op = &vdfs_inode_operations;
+                inode->i_fop = &vdfs_file_operations;
+        }
+
+        return inode;
+}
 
 /* 
- * Fill the superblock
+ * Fill the vdfs superblock
  */
 static int vdfs_fill_super(struct super_block *sb, void *data, int flags){
 
@@ -83,7 +97,7 @@ static int vdfs_fill_super(struct super_block *sb, void *data, int flags){
 		return (-ENOMEM);
 	}
 
-	printk(KERN_INFO "vdfs_fill_super: successfully allocated sb.");
+	printk(KERN_INFO "vdfs_fill_super: successfully allocated sb.\n");
 	return 0;
 }
 
@@ -93,7 +107,9 @@ static int vdfs_fill_super(struct super_block *sb, void *data, int flags){
 static struct dentry* vdfs_mount(struct file_system_type *fs_type,
 		int flags, const char *dev_name, void *data){
 
-	return mount_nodev(fs_type, flags, data, vdfs_fill_super);
+	printk(KERN_INFO "vdfs: Mounting.\n");
+
+	return mount_bdev(fs_type, flags, dev_name, data, vdfs_fill_super);
 }
 
 /*
@@ -101,23 +117,11 @@ static struct dentry* vdfs_mount(struct file_system_type *fs_type,
  */
 static void vdfs_kill_sb(struct super_block *sb){
 
-	// Free the super_block
-	printk("vdfs: Unmounting.\n");
+	printk(KERN_INFO "vdfs: Unmounting.\n");
 
+	// Free the super_block
 	// free(sb);
 	return ;
-}
-
-/*
- * Register the vdfs file system
- */
-int __init register_vdfs(void){
-
-	int ret;
-
-	ret = register_filesystem(&vdfs_fs_type);
-
-	return ret;
 }
 
 /* 
@@ -126,18 +130,20 @@ int __init register_vdfs(void){
 static int __init init_vdfs(void){
 
 	int ret;
-	printk("vdfs: init");
-	ret = register_vdfs();
+
+	printk(KERN_INFO "vdfs: init\n");
+	ret = register_filesystem(&vdfs_fs_type);
+
 	return 0;
 }
 
 /*
- * Stop vdfs.
+ * Exit vdfs.
  */
 static  void __exit exit_vdfs(void){
 
 	unregister_filesystem(&vdfs_fs_type);
-	printk("vdfs: exit.");
+	printk(KERN_INFO "vdfs: exit.\n");
 }
 
 module_init(init_vdfs);
